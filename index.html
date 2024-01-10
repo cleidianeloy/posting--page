@@ -1,0 +1,122 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="UTF-8">
+        <title>Blog</title>
+    </head>
+    <body>
+
+        <style>
+            body{
+                background-color: #FFE0E3;
+                font-family: system-ui;
+            }
+            section{
+                display: grid;
+                grid-template-rows: 1fr 1fr;
+                height: 80%;
+                align-content: center;
+                align-items: center;
+                justify-items: center;
+            }
+            #formulario, #renderizador {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                align-items: center;
+                margin: auto;
+                background-color: white;
+                border-radius: 10px;
+                justify-content: center;
+                flex-wrap: nowrap;
+                
+            }
+            #formulario{
+                padding: 2%;
+            }
+            .respondido#renderizador{
+                padding: 2%;
+            }
+        </style>
+            <section>
+                <form id="formulario" method="post">
+                    <label for="titulo">Titulo</label>
+                    <input id="titulo" type="text"/>
+                    <label for="paragrafo">Paragrafo</label>
+                    <input id="paragrafo" type="text"/>
+                    <button type="submit">enviar</button>
+                </form>
+                <div id="renderizador">
+                    <h2 id="renderizador-titulo"></h2>
+                    <p id="renderizador-paragrafo"></p>
+                </div>
+            </section>
+
+    </body>
+    <script>
+        class PacoteBuscador {
+          constructor(baseURL) {
+              this.baseURL = baseURL;
+          }
+
+          get(endpoint) {
+              return fetch(this.baseURL + endpoint)
+                  .then(response => response.json());
+          }
+
+          put(endpoint, body) {
+              return this._send("put", endpoint, body);
+          }
+
+          post(endpoint, body) {
+              return this._send("post", endpoint, body);
+          }
+
+          delete(endpoint, body) {
+              return this._send("delete", endpoint, body);
+          }
+
+          _send(method, endpoint, body) {
+              return fetch(this.baseURL + endpoint, {
+                  method,
+                  headers: {
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify(body)
+              }).then(response => response.json());
+          }
+      }
+        const API = new PacoteBuscador("https://jsonplaceholder.typicode.com");
+        const formulario =  document.querySelector("form#formulario");
+        const renderizadorTitulo = document.querySelector("#renderizador-titulo");
+        const renderizadorParagrafo = document.querySelector("#renderizador-paragrafo");
+        const inputTitulo = document.querySelector("#titulo");
+        const inputParagrafo = document.querySelector("#paragrafo");
+        const renderizador = document.querySelector("#renderizador");
+        formulario.addEventListener('submit', function(event){
+            event.preventDefault();
+            const data = {
+                title: inputTitulo.value,
+                body: inputParagrafo.value,
+                userId: 1
+            }
+            renderizadorTitulo.innerHTML = data.title;
+            renderizadorParagrafo.innerHTML = data.body;
+            renderizador.classList.add("respondido");
+            API.post("/posts", data)
+            .then((dados) =>{
+                console.log(dados);
+            }).catch((error) =>{
+                console.log(error);
+            })
+            
+        })
+        function limpaResposta(){
+            renderizador.classList.remove("respondido");
+            renderizadorTitulo.innerHTML = "";
+            renderizadorParagrafo.innerHTML = "";
+        }
+        inputTitulo.addEventListener("keydown", limpaResposta);
+        inputParagrafo.addEventListener("keydown", limpaResposta);
+    </script>
+</html>
